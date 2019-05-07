@@ -19,6 +19,7 @@ package backup
 import (
 	"archive/tar"
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"time"
 
@@ -92,6 +93,7 @@ func (f *defaultItemBackupperFactory) newItemBackupper(
 
 type ItemBackupper interface {
 	backupItem(logger logrus.FieldLogger, obj runtime.Unstructured, groupResource schema.GroupResource) error
+	uploadItem(logger logrus.FieldLogger)
 }
 
 type defaultItemBackupper struct {
@@ -347,15 +349,19 @@ func (ib *defaultItemBackupper) executeActions(
 // or returns an existing one if one's already been initialized for the location.
 func (ib *defaultItemBackupper) blockStore(snapshotLocation *api.VolumeSnapshotLocation) (cloudprovider.BlockStore, error) {
 	if bs, ok := ib.snapshotLocationBlockStores[snapshotLocation.Name]; ok {
+		fmt.Println("*******************************", bs, "*****************************")
 		return bs, nil
 	}
 
 	bs, err := ib.blockStoreGetter.GetBlockStore(snapshotLocation.Spec.Provider)
 	if err != nil {
+		fmt.Println("****Error in getting blockstore ", err)
 		return nil, err
 	}
 
+	fmt.Println("*******************************", bs, "*****************************")
 	if err := bs.Init(snapshotLocation.Spec.Config); err != nil {
+		fmt.Println("****Error in init blockstore ", err)
 		return nil, err
 	}
 
@@ -428,6 +434,7 @@ func (ib *defaultItemBackupper) takePVSnapshot(obj runtime.Unstructured, log log
 
 		log.Infof("Got volume ID for persistent volume")
 		blockStore = bs
+		fmt.Println("**** BlockStore ", blockStore)
 		location = snapshotLocation.Name
 		break
 	}
@@ -486,4 +493,19 @@ func volumeSnapshot(backup *api.Backup, volumeName, volumeID, volumeType, az, lo
 			Phase: volume.SnapshotPhaseNew,
 		},
 	}
+}
+
+func (ib *defaultItemBackupper) uploadItem(log logrus.FieldLogger) {
+	// volumeSnapshotter := ib.blockStoreVolumeSnapshotter
+	// if volumeSnapshotter == nil {
+	// 	log.Info("No volumeSnapshotter provided skipping")
+	// 	return
+	// }
+
+	// for _, snapshot := range ib.backupRequest.VolumeSnapshots {
+	// 	volumeSnapshotter.UploadSnapshot(snapshot.Spec.ProviderVolumeID, snapshot.Spec.VolumeAZ, ib.tagMapper[snapshot])
+	// }
+	fmt.Println("**********************************")
+	fmt.Println("Inside upload Item method")
+	fmt.Println("**********************************")
 }

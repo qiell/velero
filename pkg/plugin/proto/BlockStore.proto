@@ -61,6 +61,12 @@ message SetVolumeIDResponse {
   bytes persistentVolume = 1;
 }
 
+message UploadSnapshotRequest {
+  string volumeID = 5;
+  string volumeAZ = 10;
+  map<string, string> tags = 6;
+}
+
 service BlockStore {
     rpc Init(InitRequest) returns (Empty);
     rpc CreateVolumeFromSnapshot(CreateVolumeRequest) returns (CreateVolumeResponse);
@@ -69,4 +75,5 @@ service BlockStore {
     rpc DeleteSnapshot(DeleteSnapshotRequest) returns (Empty);
     rpc GetVolumeID(GetVolumeIDRequest) returns (GetVolumeIDResponse);
     rpc SetVolumeID(SetVolumeIDRequest) returns (SetVolumeIDResponse);
+    rpc UploadSnapshot(UploadSnapshotRequest) returns (Empty);
 }

@@ -264,7 +264,9 @@ func (rb *defaultResourceBackupper) backupResource(
 			}
 		}
 	}
-
+	if gr == kuberesource.Pods {
+		itemBackupper.uploadItem(log)
+	}
 	return kuberrs.NewAggregate(errs)
 }
 

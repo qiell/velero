@@ -19,7 +19,7 @@ package plugin
 import (
 	"encoding/json"
 
-	"github.com/hashicorp/go-plugin"
+	plugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -185,6 +185,10 @@ func (c *BlockStoreGRPCClient) SetVolumeID(pv runtime.Unstructured, volumeID str
 	}
 
 	return &updatedPV, nil
+}
+
+func (s *BlockStoreGRPCClient) UploadSnapshot(ctx context.Context, req *proto.UploadSnapshotRequest) (*proto.Empty, error) {
+	return &proto.Empty{}, nil
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -355,4 +359,8 @@ func (s *BlockStoreGRPCServer) SetVolumeID(ctx context.Context, req *proto.SetVo
 	}
 
 	return &proto.SetVolumeIDResponse{PersistentVolume: updatedPVBytes}, nil
+}
+
+func (s *BlockStoreGRPCServer) UploadSnapshot(ctx context.Context, req *proto.UploadSnapshotRequest) (*proto.Empty, error) {
+	return &proto.Empty{}, nil
 }

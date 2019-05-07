@@ -359,3 +359,7 @@ func (b *blockStore) SetVolumeID(pv runtime.Unstructured, volumeID string) (runt
 
 	return pv, nil
 }
+
+func (b *blockStore) UploadSnapshot(volumeID, volumeAZ string, tags map[string]string) error {
+	return nil
+}
