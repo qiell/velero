@@ -16,8 +16,6 @@ limitations under the License.
 package plugin
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -65,7 +63,6 @@ func (r *restartableBlockStore) getBlockStore() (cloudprovider.BlockStore, error
 		return nil, err
 	}
 
-	fmt.Println("Plugin in restartable_block_store.go ", plugin)
 	blockStore, ok := plugin.(cloudprovider.BlockStore)
 	if !ok {
 		return nil, errors.Errorf("%T is not a cloudprovider.BlockStore!", plugin)
@@ -162,10 +159,10 @@ func (r *restartableBlockStore) DeleteSnapshot(snapshotID string) error {
 }
 
 // UploadSnapshot restarts the plugin's process if needed, then delegates the call.
-func (r *restartableBlockStore) UploadSnapshot(volumeID string, volumeAZ string, tags map[string]string) error {
+func (r *restartableBlockStore) UploadSnapshot(volumeID string) error {
 	delegate, err := r.getDelegate()
 	if err != nil {
 		return err
 	}
-	return delegate.UploadSnapshot(volumeID, volumeAZ, tags)
+	return delegate.UploadSnapshot(volumeID)
 }

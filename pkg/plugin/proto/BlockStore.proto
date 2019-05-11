@@ -62,9 +62,8 @@ message SetVolumeIDResponse {
 }
 
 message UploadSnapshotRequest {
+  string plugin = 1;
   string volumeID = 5;
-  string volumeAZ = 10;
-  map<string, string> tags = 6;
 }
 
 service BlockStore {

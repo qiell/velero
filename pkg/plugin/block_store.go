@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
 
 	plugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
@@ -187,8 +188,10 @@ func (c *BlockStoreGRPCClient) SetVolumeID(pv runtime.Unstructured, volumeID str
 	return &updatedPV, nil
 }
 
-func (s *BlockStoreGRPCClient) UploadSnapshot(ctx context.Context, req *proto.UploadSnapshotRequest) (*proto.Empty, error) {
-	return &proto.Empty{}, nil
+func (c *BlockStoreGRPCClient) UploadSnapshot(volumeID string) error {
+	_, err := c.grpcClient.UploadSnapshot(context.Background(), &proto.UploadSnapshotRequest{Plugin: c.plugin, VolumeID: volumeID})
+
+	return err
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -362,5 +365,15 @@ func (s *BlockStoreGRPCServer) SetVolumeID(ctx context.Context, req *proto.SetVo
 }
 
 func (s *BlockStoreGRPCServer) UploadSnapshot(ctx context.Context, req *proto.UploadSnapshotRequest) (*proto.Empty, error) {
+	impl, err := s.getImpl(req.Plugin)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Calling impl.UploadSnapshot")
+	err = impl.UploadSnapshot(req.GetVolumeID())
+	if err != nil {
+		return nil, err
+	}
 	return &proto.Empty{}, nil
 }

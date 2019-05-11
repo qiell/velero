@@ -217,6 +217,11 @@ func (rb *defaultResourceBackupper) backupResource(
 		namespacesToList = []string{""}
 	}
 
+	if gr == kuberesource.Pods {
+		log.Info("=Calling UploadItem Method")
+		itemBackupper.uploadItem(log)
+	}
+
 	for _, namespace := range namespacesToList {
 		resourceClient, err := rb.dynamicFactory.ClientForGroupVersionResource(gv, resource, namespace)
 		if err != nil {
@@ -259,13 +264,15 @@ func (rb *defaultResourceBackupper) backupResource(
 				continue
 			}
 
+			// if gr == kuberesource.Pods {
+			// 	log.Info("=Calling UploadItem Method")
+			// 	itemBackupper.uploadItem(log)
+			// }
+
 			if err := itemBackupper.backupItem(log, unstructured, gr); err != nil {
 				errs = append(errs, err)
 			}
 		}
-	}
-	if gr == kuberesource.Pods {
-		itemBackupper.uploadItem(log)
 	}
 	return kuberrs.NewAggregate(errs)
 }

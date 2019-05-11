@@ -349,19 +349,15 @@ func (ib *defaultItemBackupper) executeActions(
 // or returns an existing one if one's already been initialized for the location.
 func (ib *defaultItemBackupper) blockStore(snapshotLocation *api.VolumeSnapshotLocation) (cloudprovider.BlockStore, error) {
 	if bs, ok := ib.snapshotLocationBlockStores[snapshotLocation.Name]; ok {
-		fmt.Println("*******************************", bs, "*****************************")
 		return bs, nil
 	}
 
 	bs, err := ib.blockStoreGetter.GetBlockStore(snapshotLocation.Spec.Provider)
 	if err != nil {
-		fmt.Println("****Error in getting blockstore ", err)
 		return nil, err
 	}
 
-	fmt.Println("*******************************", bs, "*****************************")
 	if err := bs.Init(snapshotLocation.Spec.Config); err != nil {
-		fmt.Println("****Error in init blockstore ", err)
 		return nil, err
 	}
 
@@ -496,16 +492,31 @@ func volumeSnapshot(backup *api.Backup, volumeName, volumeID, volumeType, az, lo
 }
 
 func (ib *defaultItemBackupper) uploadItem(log logrus.FieldLogger) {
-	// volumeSnapshotter := ib.blockStoreVolumeSnapshotter
-	// if volumeSnapshotter == nil {
-	// 	log.Info("No volumeSnapshotter provided skipping")
-	// 	return
-	// }
+	var (
+		location   string
+		blockStore cloudprovider.BlockStore
+	)
 
-	// for _, snapshot := range ib.backupRequest.VolumeSnapshots {
-	// 	volumeSnapshotter.UploadSnapshot(snapshot.Spec.ProviderVolumeID, snapshot.Spec.VolumeAZ, ib.tagMapper[snapshot])
-	// }
-	fmt.Println("**********************************")
-	fmt.Println("Inside upload Item method")
-	fmt.Println("**********************************")
+	for _, snapshotLocation := range ib.backupRequest.SnapshotLocations {
+		// log := log.WithField("volumeSnapshotLocation", snapshotLocation.Name)
+
+		bs, err := ib.blockStore(snapshotLocation)
+		if err != nil {
+			log.WithError(err).Error("Error getting block store for volume snapshot location")
+			continue
+		}
+
+		// if volumeID, err = bs.GetVolumeID(obj); err != nil {
+		// 	log.WithError(err).Errorf("Error attempting to get volume ID for persistent volume")
+		// 	continue
+		// }
+		// if volumeID == "" {
+		// 	log.Infof("No volume ID returned by block store for persistent volume")
+		// 	continue
+		// }
+		blockStore = bs
+		location = snapshotLocation.Name
+		log.Info("location ", location)
+	}
+	blockStore.UploadSnapshot("Test-vol-ID")
 }
